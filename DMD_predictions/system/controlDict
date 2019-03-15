@@ -1,0 +1,243 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+libs (
+      "libOpenFOAM.so"
+      "libsimpleSwakFunctionObjects.so"
+      "libswakFunctionObjects.so"
+      "libgroovyBC.so"
+      "libincompressibleTurbulenceModel.so"
+    "libincompressibleRASModels.so"
+   "libmyTurbulenceModels.so"
+    "libgroovyStandardBCs.so"
+    "libsimpleFunctionObjects.so"
+     ); 
+
+application     pimpleFoam;
+
+startFrom      latestTime; //startTime; //startTime;
+
+startTime       0.;
+
+stopAt           endTime;
+
+endTime        200;
+
+deltaT          0.03;
+
+writeControl    timeStep; //adjustableRunTime; //timeStep; //
+
+writeInterval   20; //0.1;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep no;
+
+maxCo           0.9;
+
+
+functions
+{
+/*
+staticP    // user-defined name of function object entry
+    {
+        type            pressureTools;
+       functionObjectLibs ("libutilityFunctionObjects.so");
+       // libs            ("libutilityFunctionObjects.so");
+        //region          defaultRegion;
+        enabled         yes;
+        //timeStart       0;
+        //timeEnd         10;
+        outputControl outputTime;//
+        outputInterval 1; // 5000;
+        calcTotal   no;
+        calcCoeff   yes;
+        pRef 0;
+        rhoName    rhoInf;
+        rhoInf 1;
+       pInf 0;
+	UInf (1 0 0);  
+    }
+writeMissingFields
+    {
+        type writeRegisteredObject;
+        functionObjectLibs ( "libIOFunctionObjects.so" );
+        objectNames ("phi");
+        outputControl     outputTime;
+    }
+*/
+ /*
+     probes
+    {
+        // Where to load it from
+        functionObjectLibs ( "libsampling.so" );
+
+        type            probes;
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        outputControl   outputTime;
+        outputInterval  1;
+
+        // Fields to be probed
+        fields
+        (
+            p U
+        );
+
+        probeLocations
+        (
+            ( 0 0.6 1.6 )        // at top
+            ( 0 -0.6 1.6 )  // at bottom
+            ( 2.66 0.66 1.6 )   // at outlet2
+            ( 2.66 -0.66 1.6 )         // at central block
+            ( 2 -0.55 1.6 )
+            ( 2 0.55 1.6 )
+            (1 0.55 1.6)
+            (1 -0.55 1.6)  
+            (-5 -0.55 1.6)
+            (0 5 1.6)
+        );
+    }
+*/
+cuttingPlane
+    {
+        type            surfaces;
+        functionObjectLibs ( "libsampling.so" );
+        outputControl   outputTime;
+        surfaceFormat   vtk;
+        fields          ( p U );
+        interpolationScheme cellPoint;
+        surfaces
+        (
+            zNormal
+            {
+                type cuttingPlane;
+                planeType pointAndNormal;
+                pointAndNormalDict
+                {
+                    basePoint (0 0 0.5);
+                    normalVector (0 0 1);
+                }
+                interpolate true;
+            }
+        );
+    }
+
+/*
+reloadstaticP
+      {
+          type        readFields;
+          functionObjectLibs ("libfieldFunctionObjects.so");
+          //region          defaultRegion;
+          enabled         yes;
+          //timeStart       0;
+          //timeEnd         10;
+          outputControl timeStep;//outputTime;//
+          outputInterval 1; // 5000;
+          fields
+          (
+              "static(p)_coeff"
+          );
+      }
+     totalPressure_left
+      {
+        $Average_left;
+        operation       weightedAverage;
+        weightField     rho;
+        
+        fields
+        (
+          total(p)
+        );*/
+ /*
+fieldAverage1
+    {
+        type            fieldAverage;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        enabled         true;
+        outputControl   outputTime;
+  //      outputControl   timeStep;
+   //     outputInterval  60;
+       // outputInterval  10;
+        fields
+        (
+            U
+               {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+
+            p
+            {
+                mean        on;
+                prime2Mean  on;
+                base        time;
+            }
+   
+       static(p)_coeff
+            {
+                mean        on;
+                prime2Mean  off;
+                base        time;
+            }
+
+        );
+    }
+
+    forceCoefficients
+    {
+        type        forceCoeffs;
+        functionObjectLibs ("libforces.so");
+        log         yes;
+        patches     (cylinder);
+        dragDir     (1 0 0);
+        liftDir     (0 1 0);
+        pitchAxis   (0 0 1);
+        magUInf     1;
+        lRef        1; // Diameter
+       Aref       3.2828; // Diameter x Height
+        rhoName rhoInf;
+        rhoInf 1;
+        origin      (0 0 0);
+        coordinateRotation
+        {
+            type        EulerRotation
+            degrees     true;
+            rotation    (0 0 0);
+        }
+    }
+*/
+} 
+
+// ************************************************************************* //
